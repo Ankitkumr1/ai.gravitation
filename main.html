@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ai Tool for Gravitation class 9 BY Ankit Verma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: "Calm Neutrals" - A palette using warm neutrals (slate, stone, zinc) with a subtle sky blue accent for a calm, academic, and modern feel. -->
+    <!-- Application Structure Plan: The application is structured as a tabbed, single-page interface. The navigation allows users to switch between five distinct, interactive sections: "Introduction," "Universal Law," "Free Fall Lab," "Mass vs. Weight," and "Float or Sink?". This non-linear structure was chosen to break down the complex physics chapter into manageable, thematic modules. Instead of passive reading, users can directly engage with the concepts they are most interested in, fostering active learning. The user flow is designed for exploration, with each section providing a self-contained interactive tool or simulation that explains a core principle from the source document. -->
+    <!-- Visualization & Content Choices: 
+        - Universal Law: Goal is to show relationships. An interactive simulation with sliders for mass and distance updates a force calculation in real-time. This is more intuitive than a static formula. Method: HTML elements updated with vanilla JS.
+        - Free Fall Lab: Goal is to apply formulas. Interactive calculators for problems found in the report (e.g., final velocity, max height) allow users to experiment with inputs. Method: HTML forms and vanilla JS.
+        - Mass vs. Weight: Goal is to compare. A bar chart dynamically compares an object's weight on different celestial bodies, clarifying the distinction between constant mass and variable weight. Library: Chart.js on a Canvas element.
+        - Float or Sink?: Goal is to demonstrate a principle. A simple visual simulation shows an object floating or sinking based on user-inputted mass and volume, which calculates density. Method: HTML/CSS animations triggered by vanilla JS.
+        - All sections use contextual text blocks to explain the concepts and interactions, drawing content from the source report. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .tab-active {
+            background-color: #0ea5e9; /* sky-500 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .tab-inactive {
+            background-color: #e2e8f0; /* slate-200 */
+            color: #475569; /* slate-600 */
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .calculator-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            border: 1px solid #e2e8f0; /* slate-200 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900">Interactive Guide to Gravitation</h1>
+            <p class="mt-2 text-lg text-slate-600">Explore the fundamental force that shapes our universe.</p>
+        </header>
+
+        <nav class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
+            <button class="nav-tab px-4 py-2 rounded-full font-semibold transition-all duration-300 tab-active" data-tab="introduction">Introduction</button>
+            <button class="nav-tab px-4 py-2 rounded-full font-semibold transition-all duration-300 tab-inactive" data-tab="universal-law">Universal Law</button>
+            <button class="nav-tab px-4 py-2 rounded-full font-semibold transition-all duration-300 tab-inactive" data-tab="free-fall">Free Fall Lab</button>
+            <button class="nav-tab px-4 py-2 rounded-full font-semibold transition-all duration-300 tab-inactive" data-tab="mass-weight">Mass vs. Weight</button>
+            <button class="nav-tab px-4 py-2 rounded-full font-semibold transition-all duration-300 tab-inactive" data-tab="buoyancy">Float or Sink?</button>
+        </nav>
+
+        <main>
+            <!-- Introduction Section -->
+            <section id="introduction" class="content-section active">
+                <div class="calculator-card text-center">
+                    <h2 class="text-2xl font-bold mb-4 text-sky-600">What is Gravitation?</h2>
+                    <p class="text-slate-600 leading-relaxed max-w-3xl mx-auto">
+                        We know that an object dropped from a height falls towards the Earth. All planets go around the Sun, and the Moon goes around the Earth. In all these cases, there must be some force acting on the objects. Isaac Newton recognized that the same force is responsible for all of these phenomena: the **gravitational force**. It is the fundamental force of attraction between any two objects with mass. This guide will help you interactively explore this force and its consequences.
+                    </p>
+                    <div class="mt-6 flex justify-center items-center gap-8 flex-wrap">
+                        <div class="text-center">
+                            <span class="text-5xl">🍎</span>
+                            <p class="mt-2 font-semibold">Falling Objects</p>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-5xl">🌍 orbiting ☀️</span>
+                            <p class="mt-2 font-semibold">Planetary Orbits</p>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-5xl">🌕 orbiting 🌍</span>
+                            <p class="mt-2 font-semibold">Lunar Orbit</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Universal Law Section -->
+            <section id="universal-law" class="content-section">
+                 <div class="calculator-card">
+                    <h2 class="text-2xl font-bold mb-2 text-center text-sky-600">The Universal Law of Gravitation</h2>
+                    <p class="text-slate-600 leading-relaxed max-w-3xl mx-auto text-center mb-6">
+                        This law states that every object in the universe attracts every other object with a force that is directly proportional to the product of their masses and inversely proportional to the square of the distance between their centers. Use the sliders below to see how changing mass and distance affects this force.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="mass1" class="font-medium">Mass 1 (m₁): <span id="mass1-val">50</span> x 10²² kg</label>
+                                    <input id="mass1" type="range" min="1" max="100" value="50" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                </div>
+                                <div>
+                                    <label for="mass2" class="font-medium">Mass 2 (m₂): <span id="mass2-val">50</span> x 10²² kg</label>
+                                    <input id="mass2" type="range" min="1" max="100" value="50" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                </div>
+                                <div>
+                                    <label for="distance" class="font-medium">Distance (d): <span id="distance-val">10</span> x 10⁸ m</label>
+                                    <input id="distance" type="range" min="1" max="20" value="10" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                </div>
+                            </div>
+                            <div class="mt-6 text-center bg-sky-100 p-4 rounded-lg">
+                                <p class="text-lg font-semibold">Calculated Gravitational Force (F):</p>
+                                <p id="force-result" class="text-3xl font-bold text-sky-600">4.17 x 10²² N</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-center items-center h-64 relative">
+                            <div id="body1" class="bg-blue-500 rounded-full transition-all duration-200" style="width: 50px; height: 50px;"></div>
+                            <div class="bg-slate-400 absolute top-1/2 left-0 w-full h-0.5" style="transform: translateY(-50%);"></div>
+                            <div id="body2" class="bg-green-500 rounded-full transition-all duration-200" style="width: 50px; height: 50px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Free Fall Section -->
+            <section id="free-fall" class="content-section">
+                <div class="calculator-card">
+                    <h2 class="text-2xl font-bold mb-2 text-center text-sky-600">Free Fall Laboratory</h2>
+                    <p class="text-slate-600 leading-relaxed max-w-3xl mx-auto text-center mb-6">
+                        When an object falls towards the Earth under only the influence of gravity, we say it is in free fall. Here you can solve common physics problems related to motion under gravity. We'll use g ≈ 9.8 m/s².
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Final Velocity Calculator -->
+                        <div class="calculator-card border-sky-200 border">
+                            <h3 class="font-bold text-lg mb-2">Final Velocity Calculator</h3>
+                            <p class="text-sm text-slate-500 mb-4">Calculate an object's final velocity just before it hits the ground when dropped from a certain height.</p>
+                            <div class="mb-4">
+                                <label for="ff-height" class="block font-medium mb-1">Height (m):</label>
+                                <input type="number" id="ff-height" value="19.6" class="w-full p-2 border border-slate-300 rounded-md">
+                            </div>
+                            <button id="calc-velocity-btn" class="w-full bg-sky-500 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-600 transition-colors">Calculate</button>
+                            <div id="velocity-result" class="mt-4 text-center font-semibold text-lg"></div>
+                        </div>
+                        
+                        <!-- Max Height Calculator -->
+                        <div class="calculator-card border-sky-200 border">
+                            <h3 class="font-bold text-lg mb-2">Maximum Height Calculator</h3>
+                            <p class="text-sm text-slate-500 mb-4">Calculate the maximum height reached by an object thrown vertically upwards with an initial velocity.</p>
+                             <div class="mb-4">
+                                <label for="ff-velocity" class="block font-medium mb-1">Initial Velocity (m/s):</label>
+                                <input type="number" id="ff-velocity" value="40" class="w-full p-2 border border-slate-300 rounded-md">
+                            </div>
+                            <button id="calc-height-btn" class="w-full bg-sky-500 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-600 transition-colors">Calculate</button>
+                            <div id="height-result" class="mt-4 text-center font-semibold text-lg"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mass vs. Weight Section -->
+            <section id="mass-weight" class="content-section">
+                 <div class="calculator-card">
+                    <h2 class="text-2xl font-bold mb-2 text-center text-sky-600">Mass vs. Weight</h2>
+                     <p class="text-slate-600 leading-relaxed max-w-3xl mx-auto text-center mb-6">
+                        Mass is the amount of matter in an object and is constant everywhere. Weight is the force of gravity on that mass (Weight = mass × g) and changes depending on your location. See how the weight of an object with a fixed mass changes on different celestial bodies.
+                    </p>
+                    <div class="mb-6 mx-auto max-w-md">
+                        <label for="mass-input" class="font-medium">Object Mass: <span id="mass-label">50</span> kg</label>
+                        <input id="mass-input" type="range" min="1" max="200" value="50" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="weightChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Buoyancy Section -->
+            <section id="buoyancy" class="content-section">
+                <div class="calculator-card">
+                    <h2 class="text-2xl font-bold mb-2 text-center text-sky-600">Float or Sink?</h2>
+                    <p class="text-slate-600 leading-relaxed max-w-3xl mx-auto text-center mb-6">
+                        An object immersed in a fluid experiences an upward buoyant force. Whether it floats or sinks depends on its density compared to the fluid's density. For water, the density is approximately 1 g/cm³. Input the properties of an object to find its density and see if it floats!
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div class="space-y-4">
+                             <div>
+                                <label for="buoyancy-mass" class="block font-medium mb-1">Object Mass (g):</label>
+                                <input type="number" id="buoyancy-mass" value="50" class="w-full p-2 border border-slate-300 rounded-md">
+                            </div>
+                            <div>
+                                <label for="buoyancy-volume" class="block font-medium mb-1">Object Volume (cm³):</label>
+                                <input type="number" id="buoyancy-volume" value="20" class="w-full p-2 border border-slate-300 rounded-md">
+                            </div>
+                            <button id="check-buoyancy-btn" class="w-full bg-sky-500 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-600 transition-colors">Test Object</button>
+                            <div id="buoyancy-result" class="mt-4 text-center font-semibold text-lg"></div>
+                        </div>
+
+                        <div class="h-64 bg-blue-200 rounded-lg relative overflow-hidden border-4 border-blue-400">
+                             <div class="absolute bottom-0 left-0 w-full h-full bg-blue-500" style="height: 70%;"></div>
+                             <div id="buoyancy-object" class="absolute left-1/2 w-16 h-16 bg-yellow-400 border-2 border-yellow-600 rounded-md" style="transform: translate(-50%, -150%); transition: transform 1s ease-in-out;"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.nav-tab');
+            const sections = document.querySelectorAll('.content-section');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => {
+                        t.classList.remove('tab-active');
+                        t.classList.add('tab-inactive');
+                    });
+                    tab.classList.add('tab-active');
+                    tab.classList.remove('tab-inactive');
+
+                    const target = tab.getAttribute('data-tab');
+                    sections.forEach(section => {
+                        if (section.id === target) {
+                            section.classList.add('active');
+                        } else {
+                            section.classList.remove('active');
+                        }
+                    });
+                });
+            });
+
+            // Universal Law Simulation
+            const mass1Slider = document.getElementById('mass1');
+            const mass2Slider = document.getElementById('mass2');
+            const distanceSlider = document.getElementById('distance');
+            const mass1Val = document.getElementById('mass1-val');
+            const mass2Val = document.getElementById('mass2-val');
+            const distanceVal = document.getElementById('distance-val');
+            const forceResult = document.getElementById('force-result');
+            const body1 = document.getElementById('body1');
+            const body2 = document.getElementById('body2');
+
+            function calculateForce() {
+                const G = 6.674 * Math.pow(10, -11);
+                const m1 = parseFloat(mass1Slider.value) * Math.pow(10, 22);
+                const m2 = parseFloat(mass2Slider.value) * Math.pow(10, 22);
+                const d = parseFloat(distanceSlider.value) * Math.pow(10, 8);
+                
+                const force = G * (m1 * m2) / (d * d);
+                
+                mass1Val.textContent = mass1Slider.value;
+                mass2Val.textContent = mass2Slider.value;
+                distanceVal.textContent = distanceSlider.value;
+                
+                forceResult.textContent = `${force.toExponential(2)} N`;
+
+                const maxBodySize = 100;
+                const minBodySize = 20;
+                const body1Size = minBodySize + (mass1Slider.value / 100) * (maxBodySize - minBodySize);
+                const body2Size = minBodySize + (mass2Slider.value / 100) * (maxBodySize - minBodySize);
+                body1.style.width = `${body1Size}px`;
+                body1.style.height = `${body1Size}px`;
+                body2.style.width = `${body2Size}px`;
+                body2.style.height = `${body2Size}px`;
+                
+                const maxSpacing = 150;
+                const minSpacing = 20;
+                const spacing = minSpacing + ((20 - distanceSlider.value) / 19) * (maxSpacing - minSpacing);
+                body1.style.marginRight = `${spacing}px`;
+            }
+
+            mass1Slider.addEventListener('input', calculateForce);
+            mass2Slider.addEventListener('input', calculateForce);
+            distanceSlider.addEventListener('input', calculateForce);
+            calculateForce();
+
+            // Free Fall Lab
+            const g = 9.8;
+            
+            const calcVelocityBtn = document.getElementById('calc-velocity-btn');
+            const ffHeightInput = document.getElementById('ff-height');
+            const velocityResult = document.getElementById('velocity-result');
+            calcVelocityBtn.addEventListener('click', () => {
+                const height = parseFloat(ffHeightInput.value);
+                if (isNaN(height) || height < 0) {
+                    velocityResult.textContent = "Please enter a valid height.";
+                    return;
+                }
+                const velocity = Math.sqrt(2 * g * height);
+                velocityResult.innerHTML = `Final Velocity: <span class="text-sky-600 font-bold">${velocity.toFixed(2)} m/s</span>`;
+            });
+            
+            const calcHeightBtn = document.getElementById('calc-height-btn');
+            const ffVelocityInput = document.getElementById('ff-velocity');
+            const heightResult = document.getElementById('height-result');
+            calcHeightBtn.addEventListener('click', () => {
+                const initialVelocity = parseFloat(ffVelocityInput.value);
+                if (isNaN(initialVelocity) || initialVelocity < 0) {
+                    heightResult.textContent = "Please enter a valid velocity.";
+                    return;
+                }
+                const maxHeight = (initialVelocity * initialVelocity) / (2 * g);
+                const totalDistance = maxHeight * 2;
+                heightResult.innerHTML = `Max Height: <span class="text-sky-600 font-bold">${maxHeight.toFixed(2)} m</span><br>Net Displacement: 0 m<br>Total Distance: ${totalDistance.toFixed(2)} m`;
+            });
+
+
+            // Mass vs. Weight Chart
+            let weightChart;
+            const massInput = document.getElementById('mass-input');
+            const massLabel = document.getElementById('mass-label');
+            const planetData = {
+                labels: ['Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Moon'],
+                gravity: [3.7, 8.87, 9.8, 3.71, 24.79, 10.44, 8.69, 11.15, 1.62],
+                colors: ['#a1a1aa', '#f59e0b', '#22c55e', '#ef4444', '#f97316', '#eab308', '#89f7fe', '#38bdf8', '#e2e8f0']
+            };
+
+            function createOrUpdateChart() {
+                const mass = parseFloat(massInput.value);
+                massLabel.textContent = mass;
+                const weights = planetData.gravity.map(g => (mass * g).toFixed(2));
+
+                if (weightChart) {
+                    weightChart.data.datasets[0].data = weights;
+                    weightChart.update();
+                } else {
+                    const ctx = document.getElementById('weightChart').getContext('2d');
+                    weightChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: planetData.labels,
+                            datasets: [{
+                                label: 'Weight (Newtons)',
+                                data: weights,
+                                backgroundColor: planetData.colors,
+                                borderColor: planetData.colors.map(c => c + 'cc'),
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `Weight: ${context.raw} N`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Weight (N)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+            massInput.addEventListener('input', createOrUpdateChart);
+            createOrUpdateChart();
+
+            // Buoyancy simulation
+            const buoyancyMass = document.getElementById('buoyancy-mass');
+            const buoyancyVolume = document.getElementById('buoyancy-volume');
+            const checkBuoyancyBtn = document.getElementById('check-buoyancy-btn');
+            const buoyancyResult = document.getElementById('buoyancy-result');
+            const buoyancyObject = document.getElementById('buoyancy-object');
+
+            checkBuoyancyBtn.addEventListener('click', () => {
+                const mass = parseFloat(buoyancyMass.value);
+                const volume = parseFloat(buoyancyVolume.value);
+                
+                if (isNaN(mass) || isNaN(volume) || volume <= 0) {
+                    buoyancyResult.textContent = "Please enter valid mass and volume.";
+                    return;
+                }
+
+                const density = mass / volume;
+                const waterDensity = 1; // g/cm³
+
+                buoyancyResult.innerHTML = `Object Density: <span class="text-sky-600 font-bold">${density.toFixed(2)} g/cm³</span>`;
+
+                buoyancyObject.style.transform = 'translate(-50%, -150%)'; // Reset position
+
+                setTimeout(() => {
+                    if (density > waterDensity) {
+                        buoyancyResult.innerHTML += '<br>Result: It Sinks!';
+                        buoyancyObject.style.transform = 'translate(-50%, 120%)'; // Sink
+                    } else if (density === waterDensity) {
+                        buoyancyResult.innerHTML += '<br>Result: It is neutrally buoyant!';
+                        buoyancyObject.style.transform = 'translate(-50%, 30%)'; // Neutral
+                    } else {
+                        buoyancyResult.innerHTML += '<br>Result: It Floats!';
+                        const floatPercentage = 1 - (density / waterDensity);
+                        const yPos = -80 * floatPercentage;
+                        buoyancyObject.style.transform = `translate(-50%, ${yPos}%)`; // Float
+                    }
+                }, 100);
+
+            });
+
+        });
+    </script>
+</body>
+</html>
